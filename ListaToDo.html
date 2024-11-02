@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Imperial+Script&family=Pacifico&display=swap');
+
+
+
+        .naglowek {
+            text-align: center;
+        }
+
+
+        .kontener {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            border: 10px, solid, pink;
+            width: 500px;
+            font-family: "Pacifico", cursive;
+            font-size: 20px;
+            font-weight: 300;
+            font-style: normal;
+        }
+
+        .naglowek {
+            margin-block-start: 0px;
+            margin-block-end: 0px;
+        }
+
+        .poleNaglowka {
+            background-color: lightblue;
+            width: 500px;
+        }
+
+        #kontenerUl {
+            width: 100%;
+        }
+
+        #mojUl li {
+            overflow-wrap: break-word;
+        }
+
+        .przycisk {
+            border: 5px, solid, rgb(235, 116, 136);
+            background-color: rgb(233, 161, 173);
+            display: inline;
+            posi
+        }
+
+        .przycisk:hover {
+            background-color: rgb(235, 116, 136);
+        }
+
+        .close {
+            right: 0;
+            top: 0;
+            padding: 12px 16px 12px 16px;
+        }
+
+        #mojInput {
+            border: 5px, solid, rgb(235, 116, 136);
+            font-family: "Pacifico", cursive;
+            width: 486px;
+
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="kontener">
+
+        <div class="poleNaglowka">
+            <br>
+            <h1 class="naglowek">Lista TO DO</h1>
+            <input type="text" id="mojInput" placeholder="Nowy TO DO">
+            <br>
+            <br>
+            <span onclick="createAndSave()" class="przycisk">Dodaj</span>
+        </div>
+        <div id="kontenerUl">
+            <ul id="mojUl" />
+        </div>
+
+    </div>
+
+    <script>
+        //to jest klucz do odczytu i zapisu itemów do localStorage
+        const todoKey = "todo";
+
+        //odczyt wartości z locala na podstawie klucza
+        //przykład todoJSON '["item pierwszy","item drugi","item trzeci"]'
+        var todoJSON = localStorage.getItem(todoKey);
+        if (todoJSON != null) {
+            //Jesli sa jakies zapisane itemy to generujemy je na stronke
+            console.log("Initial load from a localStorage " + todoJSON)
+            var todoItems = JSON.parse(todoJSON)
+            for (let i = 0; i < todoItems.length; i++) {
+                newElement(todoItems[i]);
+            }
+        }
+
+        //wywolane na buttonie dodaj - dodawanie nowego elementu i update locala
+        function createAndSave() {
+            var inputValue = document.getElementById("mojInput").value;
+            if (inputValue === '') {
+                //jesli input pusty to alert
+                alert("Wpisz swój TO DO!");
+            } else {
+                //tworzy nowy
+                newElement(inputValue);
+                //zerujemy input
+                document.getElementById("mojInput").value = "";
+                //zapisujemy do localStorage
+                updateLocalStorage();
+            }
+        }
+
+        //tworzenie nowego elementu wraz z opcja "close", zwraca true gdy dodano, lub false gdy nie dodano
+        function newElement(inputValue) {
+            //nowy element "li"
+            var li = document.createElement("li");
+            //robimy txt z wartością
+            var txt = document.createTextNode(inputValue);
+            //mergujemy txt do "li", a nastepnie "li" do calej "ul"
+            li.appendChild(txt);
+            document.getElementById("mojUl").appendChild(li);
+            //dodajemy opcję close na nowym "li"
+            createClose(li);
+        }
+
+        //opcja close rejestruje funkcje i dodaje "x"
+        function createClose(todoItem) {
+            //span z "x"
+            var span = document.createElement("SPAN");
+            var txt = document.createTextNode("x");
+            span.className = "close";
+            span.appendChild(txt);
+            //on click na nim usuwa cały parent oraz updejtuje localStorge bo usunieto element
+            span.onclick = function () {
+                var item = this.parentElement;
+                item.remove();
+                console.log("Removing: " + item.textContent);
+                updateLocalStorage();
+            }
+            //mergujemy spana do nowego "li"
+            todoItem.appendChild(span);
+        }
+
+        //zapisuje wszystkie wartości "li" do localStorge
+        function updateLocalStorage() {
+            //cała lista elementów "li"
+            var itemsToSave = document.getElementsByTagName("LI");
+            var arrayOfValues = [];
+            //mapujemy same wartosci do zapisania
+            for (let i = 0; i < itemsToSave.length; i++) {
+                //first child to txt z własciwą wartością - jest też kolejny span z x ale tego nie chcemy zapisać
+                var value = itemsToSave[i].firstChild.textContent;
+                arrayOfValues[i] = value;
+            }
+            //robimy JSONA stringa ze zmapowanych wartości
+            var jsonToSave = JSON.stringify(arrayOfValues);
+            console.log("Saving to localStorage: " + jsonToSave);
+            //save do locala pod znanym kluczem
+            localStorage.setItem(todoKey, jsonToSave);
+        }
+    </script>
+
+</body>
+
+</html>
